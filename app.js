@@ -59,9 +59,12 @@ document.addEventListener('DOMContentLoaded',()=>{
                 body:JSON.stringify({prompt: PT})
             });
             if(!res.ok){
-                let errMsg;
-                try{ const errJson=await res.json(); errMsg=errJson.error||JSON.stringify(errJson); }
-                catch(_){ errMsg=await res.text(); }
+                const text = await res.text();
+                let errMsg = text;
+                try {
+                    const errJson = JSON.parse(text);
+                    errMsg = errJson.error || JSON.stringify(errJson);
+                } catch(_) {}
                 throw new Error(errMsg);
             }
             const d=await res.json();
