@@ -30,7 +30,7 @@ export default async function handler(request) {
     }
 
     const payload = {
-      model: "llama3-70b-8192",
+      model: "llama-3.1-8b-instant",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: prompt }
