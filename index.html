@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Your Life Decider</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="background-effects"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
+<main class="container">
+<header class="app-header">
+    <h1 class="gradient-text">Your Life Decider</h1>
+    <p class="subtitle">Multi-goal management integrated into realistic daily constraints.</p>
+    <button id="resetSessionBtn" class="btn btn-outline hidden" style="margin: 20px auto 0 auto; max-width: 250px;">Clear Active Session</button>
+</header>
+<section id="intakeSection" class="input-section glass-card">
+<div class="input-group"><label>Daily Constraints</label><p class="sub-label">Non-negotiable tasks (e.g. Work 9-5)</p><textarea id="timeConstraints" class="form-control" placeholder="I work 9-5 daily and sleep for 8 hours."></textarea></div>
+<div class="input-group"><label>Hours Available for Goals</label><p class="sub-label">Total hours a day dedicated across ALL goals?</p><input type="number" id="hoursAvailable" class="form-control" min="0.5" max="24" step="0.5" value="3"></div>
+<div class="goals-container" id="goalsContainer"><label>Your Goals (Max 10)</label></div>
+<button id="addGoalBtn" class="btn btn-outline">+ Add Another Goal</button>
+<button id="navigateBtn" class="btn btn-primary" style="margin-top:20px;"><span class="btn-text">Generate Life Schedule</span><span class="loader hidden"></span></button>
+</section>
+<section id="appOutput" class="hidden">
+<div class="system-dashboard result-card glass-card"><div class="card-header"><div class="icon-box info-icon" style="background:rgba(16,185,129,.1);color:#34d399;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><h2>Global Time Blueprint</h2></div>
+<div class="card-content"><p id="scheduleEvaluation" class="text-body"></p><div id="scheduleGrid" class="dashboard-grid"></div></div></div>
+<div class="tabs-container" id="tabsRow"></div>
+<div id="goalContentContainer" class="results-section"></div>
+</section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
