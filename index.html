@@ -1,31 +1,699 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Your Life Decider</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Life Decider</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #030712;
+            --card-bg: rgba(15, 23, 42, 0.4);
+            --card-border: rgba(56, 189, 248, 0.2);
+            --primary-gradient: linear-gradient(135deg, #0ea5e9, #3b82f6, #8b5cf6);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --font-heading: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --radius-xl: 24px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --spacing-lg: 40px;
+            --spacing-md: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            line-height: 1.7;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .background-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+            background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.15), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.15), transparent 40%);
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.4;
+            animation: float 25s infinite alternate ease-in-out;
+        }
+
+        .blob-1 {
+            top: -10%;
+            left: -10%;
+            width: 600px;
+            height: 600px;
+            background: #0284c7;
+        }
+
+        .blob-2 {
+            bottom: -20%;
+            right: -10%;
+            width: 800px;
+            height: 800px;
+            background: #6d28d9;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+
+            50% {
+                transform: translate(100px, 50px) scale(1.1) rotate(180deg);
+            }
+
+            100% {
+                transform: translate(-50px, 100px) scale(0.9) rotate(360deg);
+            }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .app-header {
+            text-align: center;
+        }
+
+        .gradient-text {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .input-section {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .sub-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: -4px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-control:focus {
+            border-color: #38bdf8;
+            background: rgba(15, 23, 42, 0.7);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+        }
+
+        .goals-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            margin-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 25px;
+        }
+
+        .goal-block {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .goal-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .remove-goal-btn {
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border-radius: var(--radius-lg);
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: #fff;
+            width: 100%;
+            box-shadow: 0 10px 20px -5px rgba(14, 165, 233, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px dashed var(--text-secondary);
+            color: var(--text-secondary);
+            width: 100%;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+
+        .stat-hours {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            padding: 12px 24px;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: var(--font-heading);
+            font-weight: 600;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-gradient);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+
+        .result-card {
+            padding: 35px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-header h2 {
+            font-size: 1.6rem;
+        }
+
+        .icon-box {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            color: #38bdf8;
+        }
+
+        .verdict-banner {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            display: inline-flex;
+        }
+
+        .verdict-banner.good {
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .verdict-banner.rethink {
+            background: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .styled-list {
+            list-style: none;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .styled-list li {
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .styled-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #38bdf8;
+            font-weight: bold;
+        }
+
+        .steps-timeline {
+            border-left: 2px dashed rgba(255, 255, 255, 0.15);
+            padding-left: 25px;
+            margin-left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .step-item {
+            position: relative;
+        }
+
+        .step-item::before {
+            content: "";
+            position: absolute;
+            left: -31px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #38bdf8;
+        }
+
+        .daily-tracker-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .daily-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 18px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+        }
+
+        .daily-item.completed {
+            opacity: 0.4;
+            text-decoration: line-through;
+        }
+
+        .check-circle {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--text-secondary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .daily-item.completed .check-circle {
+            background: #10b981;
+            border-color: #10b981;
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .resource-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 18px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .resource-title {
+            color: #e0f2fe;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(15px);
+            animation: fadeIn 0.6s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 </head>
+
 <body>
-<div class="background-effects"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
-<main class="container">
-<header class="app-header">
-    <h1 class="gradient-text">Your Life Decider</h1>
-    <p class="subtitle">Multi-goal management integrated into realistic daily constraints.</p>
-    <button id="resetSessionBtn" class="btn btn-outline hidden" style="margin: 20px auto 0 auto; max-width: 250px;">Clear Active Session</button>
-</header>
-<section id="intakeSection" class="input-section glass-card">
-<div class="input-group"><label>Daily Constraints</label><p class="sub-label">Non-negotiable tasks (e.g. Work 9-5)</p><textarea id="timeConstraints" class="form-control" placeholder="I work 9-5 daily and sleep for 8 hours."></textarea></div>
-<div class="input-group"><label>Hours Available for Goals</label><p class="sub-label">Total hours a day dedicated across ALL goals?</p><input type="number" id="hoursAvailable" class="form-control" min="0.5" max="24" step="0.5" value="3"></div>
-<div class="goals-container" id="goalsContainer"><label>Your Goals (Max 10)</label></div>
-<button id="addGoalBtn" class="btn btn-outline">+ Add Another Goal</button>
-<button id="navigateBtn" class="btn btn-primary" style="margin-top:20px;"><span class="btn-text">Generate Life Schedule</span><span class="loader hidden"></span></button>
-</section>
-<section id="appOutput" class="hidden">
-<div class="system-dashboard result-card glass-card"><div class="card-header"><div class="icon-box info-icon" style="background:rgba(16,185,129,.1);color:#34d399;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><h2>Global Time Blueprint</h2></div>
-<div class="card-content"><p id="scheduleEvaluation" class="text-body"></p><div id="scheduleGrid" class="dashboard-grid"></div></div></div>
-<div class="tabs-container" id="tabsRow"></div>
-<div id="goalContentContainer" class="results-section"></div>
-</section>
-</main>
-<script src="app.js"></script>
+    <div class="background-effects">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+    <main class="container">
+        <header class="app-header">
+            <h1 class="gradient-text">Your Life Decider</h1>
+            <p class="subtitle">Multi-goal management integrated into realistic daily constraints.</p>
+            <button id="resetSessionBtn" class="btn btn-outline hidden"
+                style="margin: 20px auto 0 auto; max-width: 250px;">Clear Active Session</button>
+        </header>
+
+        <section id="intakeSection" class="input-section glass-card">
+            <div class="input-group">
+                <label>Daily Constraints</label>
+                <p class="sub-label">Non-negotiable tasks (e.g. Work 9-5, Sleep 8h)</p>
+                <textarea id="timeConstraints" class="form-control"
+                    placeholder="I work 9-5 daily and sleep for 8 hours."></textarea>
+            </div>
+            <div class="input-group">
+                <label>Hours Available for Goals</label>
+                <p class="sub-label">Total hours dedicated across ALL goals daily?</p>
+                <input type="number" id="hoursAvailable" class="form-control" min="0.5" max="24" step="0.5" value="3">
+            </div>
+            <div class="goals-container" id="goalsContainer"><label>Your Goals (Max 10)</label></div>
+            <button id="addGoalBtn" class="btn btn-outline">+ Add Another Goal</button>
+            <button id="navigateBtn" class="btn btn-primary" style="margin-top:10px;"><span class="btn-text">Generate
+                    Life Schedule</span><span class="loader hidden"></span></button>
+        </section>
+
+        <section id="appOutput" class="hidden">
+            <div class="system-dashboard result-card glass-card">
+                <div class="card-header">
+                    <div class="icon-box">⏱</div>
+                    <h2>Global Time Blueprint</h2>
+                </div>
+                <div class="card-content">
+                    <p id="scheduleEvaluation" class="text-body"></p>
+                    <div id="scheduleGrid" class="dashboard-grid"></div>
+                </div>
+            </div>
+            <div class="tabs-container" id="tabsRow"></div>
+            <div id="goalContentContainer" class="results-section"></div>
+        </section>
+    </main>
+
+    <script>
+        const S = { i: 'ℹ️', m: '🗺️', c: '✅', g: '🛒', b: '📚', s: '⭐' };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const gE = id => document.getElementById(id);
+            const gC = gE('goalsContainer'), aB = gE('addGoalBtn'), nB = gE('navigateBtn'), tC = gE('timeConstraints'), hA = gE('hoursAvailable');
+            const aO = gE('appOutput'), tR = gE('tabsRow'), gCC = gE('goalContentContainer'), sE = gE('scheduleEvaluation'), sG = gE('scheduleGrid');
+            const rSB = gE('resetSessionBtn'), iS = gE('intakeSection');
+
+            let gCt = 0;
+
+            rSB.onclick = () => {
+                if (confirm("Are you sure you want to delete this roadmap? Your progress will reset.")) {
+                    localStorage.removeItem('saved_dashboard');
+                    location.reload();
+                }
+            };
+
+            let csh = localStorage.getItem('saved_dashboard');
+            if (csh) {
+                iS.classList.add('hidden');
+                rSB.classList.remove('hidden');
+                setTimeout(() => bD(JSON.parse(csh)), 50);
+            }
+
+            function cGB() {
+                if (gCt >= 10) return; gCt++;
+                const b = document.createElement('div'); b.className = 'goal-block fade-in'; b.id = "g-" + gCt;
+                b.innerHTML = `<div class="goal-block-header"><h4 style="color:#22d3ee;">Goal #${gCt}</h4><button class="remove-goal-btn" onclick="this.parentElement.parentElement.remove();window.uGB();">X</button></div>
+        <div class="input-group"><input type="text" class="form-control g-txt" placeholder="Goal (e.g. Learn Guitar)"></div>
+        <div class="input-group"><textarea class="form-control g-exp" placeholder="Past Experience?"></textarea></div>
+        <div class="input-group"><label style="font-size:.9rem;color:var(--text-secondary);">Duration (Days)</label><input type="number" class="form-control g-days" min="3" max="60" value="7"></div>`;
+                gC.appendChild(b); window.uGB();
+            }
+
+            window.uGB = () => { aB.style.display = document.querySelectorAll('.goal-block').length >= 10 ? 'none' : 'block'; };
+            aB.onclick = cGB;
+            cGB();
+
+            nB.onclick = async () => {
+                const c = tC.value.trim(), a = hA.value.trim(), bs = document.querySelectorAll('.goal-block'), fG = [];
+                bs.forEach(b => {
+                    const t = b.querySelector('.g-txt').value.trim(), e = b.querySelector('.g-exp').value.trim(), d = b.querySelector('.g-days').value.trim() || "7";
+                    if (t) fG.push("- Goal: " + t + " | Exp: " + (e || 'None') + " | Target Duration: " + d + " Days");
+                });
+                if (!fG.length) return alert('Please add at least one goal.');
+
+                const PT = `CONSTRAINTS: ${c}\nHOURS: ${a}/day.\nGOALS:\n${fG.join('\n')}\nCRITICAL: Return exactly ${fG.length} goals in the array matching target durations requested.`;
+
+                document.querySelector('.btn-text').classList.add('hidden');
+                document.querySelector('.loader').classList.remove('hidden');
+                nB.disabled = true; aO.classList.add('hidden');
+
+                try {
+                    const res = await fetch('/api/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: PT })
+                    });
+
+                    if (!res.ok) {
+                        const text = await res.text();
+                        let errMsg = text;
+                        try {
+                            const errJson = JSON.parse(text);
+                            errMsg = errJson.error || JSON.stringify(errJson);
+                        } catch (_) { }
+                        throw new Error(errMsg);
+                    }
+
+                    const data = await res.json();
+                    let raw = data.choices[0].message.content.replace(/^\s*```json/i, '').replace(/```\s*$/i, '');
+                    let fJ = JSON.parse(raw);
+
+                    localStorage.setItem('saved_dashboard', JSON.stringify(fJ));
+                    iS.classList.add('hidden');
+                    rSB.classList.remove('hidden');
+                    bD(fJ);
+                } catch (e) {
+                    alert('Error: ' + e.message);
+                } finally {
+                    document.querySelector('.btn-text').classList.remove('hidden');
+                    document.querySelector('.loader').classList.add('hidden');
+                    nB.disabled = false;
+                }
+            };
+
+            let cDA = [];
+            function bD(d) {
+                cDA = d.goals; sE.textContent = d.time_management.evaluation; sG.innerHTML = '';
+                d.time_management.daily_schedule.forEach(s => {
+                    const v = document.createElement('div'); v.className = 'stat-card fade-in';
+                    v.innerHTML = '<div class="stat-hours">' + s.hours + 'h</div><div>' + s.activity + '</div>'; sG.appendChild(v);
+                });
+                tR.innerHTML = '';
+                cDA.forEach((g, i) => {
+                    const b = document.createElement('button'); b.className = "tab-btn " + (i === 0 ? 'active' : '');
+                    b.textContent = g.goal_name || "Goal " + (i + 1);
+                    b.onclick = () => rT(i); tR.appendChild(b);
+                });
+                aO.classList.remove('hidden'); rT(0);
+            }
+
+            function rT(i) {
+                document.querySelectorAll('.tab-btn').forEach((b, x) => b.classList.toggle('active', x === i));
+                const g = cDA[i], h = btoa(encodeURI(g.goal_name || "g" + i)).substring(0, 20);
+
+                gCC.innerHTML = `
+            <div class="result-card glass-card fade-in">
+              <div class="card-header"><div class="icon-box">${S.i}</div><h2>Goal Analysis</h2></div>
+              <div class="card-content">
+                <div style="display:flex;gap:10px;margin-bottom:15px;">
+                  <div class="verdict-banner ${g.analysis.verdict.includes('Good') ? 'good' : 'rethink'}">${g.analysis.verdict}</div>
+                </div>
+                <p>${g.analysis.explanation}</p>
+                <ul class="styled-list" style="margin-top:15px;">${g.analysis.breakdown.map(b => "<li>" + b + "</li>").join('')}</ul>
+              </div>
+            </div>
+            <div class="result-card glass-card fade-in" style="margin-top:20px;">
+              <div class="card-header"><div class="icon-box">${S.m}</div><h2>Instructions & Timeline</h2></div>
+              <div class="steps-timeline">${g.guide.steps.map(s => '<div class="step-item"><p>' + s + '</p></div>').join('')}</div>
+            </div>
+            <div class="result-card glass-card fade-in" style="margin-top:20px;">
+              <div class="card-header"><div class="icon-box">${S.c}</div><h2>Action Tracker</h2></div>
+              <div class="daily-tracker-list" id="t-${h}"></div>
+            </div>
+            <div class="result-card glass-card fade-in" style="margin-top:20px;">
+              <div class="card-header"><div class="icon-box">${S.g}</div><h2>Recommended Gear</h2></div>
+              <div class="resources-grid">${g.gadgets.map(j => `<div class="resource-card"><a href="${j.url}" target="_blank" class="resource-title">${j.name} (${j.price_guess})</a><p>${j.reason}</p></div>`).join('')}</div>
+            </div>
+        `;
+
+                let SS = JSON.parse(localStorage.getItem("t_" + h) || "[]");
+                const tC = gE("t-" + h);
+                const rU = () => {
+                    Array.from(tC.children).forEach((n, x) => {
+                        n.className = "daily-item " + (SS[x] ? 'completed' : '');
+                    });
+                    localStorage.setItem("t_" + h, JSON.stringify(SS));
+                };
+                g.daily_plan.forEach((p, x) => {
+                    if (SS[x] === undefined) SS[x] = false;
+                    const iN = document.createElement('div'); iN.className = "daily-item";
+                    iN.innerHTML = '<div class="check-circle"></div><div><h4>' + p.day + '</h4><div>' + p.action + '</div></div>';
+                    iN.onclick = () => { SS[x] = !SS[x]; rU(); }; tC.appendChild(iN);
+                }); rU();
+            }
+        });
+    </script>
 </body>
+
 </html>
