@@ -1,10 +1,10 @@
 export const config = {
-  runtime: 'edge', // Bypasses the 10s Serverless Gateway Timeout on Vercel Free Plan
+  runtime: 'edge', // Bypasses Vercel's standard 10s timeout limit
 };
 
 const SYSTEM_PROMPT = `You are a Master Life Scheduler. User gives daily constraints, available hours, and goals.
 RULES:
-1. "time_management": Evaluate constraints vs free time. Output daily_schedule array breaking down hours for chores (sleep/work) and exact hours per goal.
+1. "time_management": Evaluate constraints vs free time. Output daily_schedule array breaking down hours for chores and exact hours per goal.
 2. For each "goal":
 - "analysis": Evaluate it independently.
 - "daily_plan": Keep daily plan concise (maximum 10 key actionable days).
@@ -21,26 +21,25 @@ export default async function handler(request) {
 
   try {
     const { prompt } = await request.json();
-
+    
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ error: 'Server missing GROQ_API_KEY environment variable in Vercel settings.' }),
+        JSON.stringify({ error: 'Server missing GROQ_API_KEY environment variable in Vercel settings.' }), 
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // Replace the model line inside api/generate.js
-const payload = {
-  model: "llama3-8b-8192",
-  messages: [
-    { role: "system", content: SYSTEM_PROMPT },
-    { role: "user", content: prompt }
-  ],
-  response_format: { type: "json_object" },
-  temperature: 0.7,
-  max_tokens: 2500
-};
+    const payload = {
+      model: "llama-3.3-70b-versatile", // Exact Groq active model ID
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: prompt }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+      max_tokens: 2500
+    };
 
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -55,13 +54,13 @@ const payload = {
       const errText = await groqRes.text();
       throw new Error(`Groq API error (${groqRes.status}): ${errText}`);
     }
-
+    
     const data = await groqRes.json();
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-
+    
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
