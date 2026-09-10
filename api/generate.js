@@ -32,7 +32,7 @@ export default async function handler(request) {
 
     // Replace the model line inside api/generate.js
 const payload = {
-  model: "llama-3.3-70b-versatile", // Updated to an active supported Groq model
+  model: "llama3-8b-8192",
   messages: [
     { role: "system", content: SYSTEM_PROMPT },
     { role: "user", content: prompt }
