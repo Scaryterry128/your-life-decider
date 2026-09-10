@@ -16,19 +16,24 @@ OUTPUT RAW JSON MATCHING:
 
 export default async function handler(request) {
   if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }), 
+      { status: 405, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
   try {
     const { prompt } = await request.json();
-    const apiKey = process.env.GROQ_API_KEY;
+    const rawApiKey = process.env.GROQ_API_KEY;
 
-    if (!apiKey) {
+    if (!rawApiKey) {
       return new Response(
-        JSON.stringify({ error: 'Missing GROQ_API_KEY in Vercel settings.' }), 
+        JSON.stringify({ error: 'Missing GROQ_API_KEY in Vercel Environment Variables.' }), 
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
+
+    const apiKey = rawApiKey.trim();
 
     const payload = {
       model: "llama-3.1-8b-instant",
@@ -45,26 +50,31 @@ export default async function handler(request) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey.trim()}`
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify(payload)
     });
 
     if (!groqRes.ok) {
       const errText = await groqRes.text();
-      throw new Error(`Groq API error (${groqRes.status}): ${errText}`);
+      return new Response(
+        JSON.stringify({ error: `Groq API returned status ${groqRes.status}: ${errText}` }), 
+        { status: groqRes.status, headers: { 'Content-Type': 'application/json' } }
+      );
     }
-    
+
     const data = await groqRes.json();
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-    
+
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ error: error.message || 'Internal Server Error' }), 
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+}
   }
 }
