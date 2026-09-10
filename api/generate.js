@@ -63,8 +63,14 @@ export default async function handler(request) {
       );
     }
 
-    const data = await groqRes.json();
-    return new Response(JSON.stringify(data), {
+    const groqData = await groqRes.json();
+    
+    // Extract and unwrap AI content string safely
+    const contentStr = groqData.choices?.[0]?.message?.content || '{}';
+    const cleanedContent = contentStr.replace(/```json|```/g, '').trim();
+    const scheduleData = JSON.parse(cleanedContent);
+
+    return new Response(JSON.stringify(scheduleData), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
