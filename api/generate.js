@@ -1,15 +1,14 @@
 export const config = {
-  runtime: 'nodejs', // Node.js runtime required for process.env access
-  maxDuration: 30,   // Allow up to 30s for large AI responses
+  runtime: 'edge', // Bypasses the 10s Serverless Gateway Timeout on Vercel Free Plan
 };
 
-const SYSTEM_PROMPT=`You are a Master Life Scheduler. User gives daily constraints, available hours, and goals (with past experience).
+const SYSTEM_PROMPT = `You are a Master Life Scheduler. User gives daily constraints, available hours, and goals.
 RULES:
 1. "time_management": Evaluate constraints vs free time. Output daily_schedule array breaking down hours for chores (sleep/work) and exact hours per goal.
 2. For each "goal":
-- "analysis" Evaluate it independently.
-- "daily_plan": User selected a Target Duration (Days). Generate EXACTLY that number of days logically in the array. Skip beginner steps if experienced.
-- "gadgets": Construct explicit urls (e.g. amazon.com/s?k=microphone).
+- "analysis": Evaluate it independently.
+- "daily_plan": Keep daily plan concise (maximum 10 key actionable days).
+- "gadgets": Construct explicit search URLs (e.g. amazon.com/s?k=microphone).
 - "learning": Provide specific Youtube Search URLs & websites.
 - "post_mastery": Provide jobs, monetization tactics.
 OUTPUT RAW JSON MATCHING:
@@ -22,11 +21,13 @@ export default async function handler(request) {
 
   try {
     const { prompt } = await request.json();
-    
-    // Securely pull API Key from Vercel Server Environment
+
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'Server missing GROQ_API_KEY environment variable.' }), { status: 500 });
+      return new Response(
+        JSON.stringify({ error: 'Server missing GROQ_API_KEY environment variable in Vercel settings.' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     const payload = {
@@ -36,7 +37,8 @@ export default async function handler(request) {
         { role: "user", content: prompt }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.7
+      temperature: 0.7,
+      max_tokens: 2500
     };
 
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -52,18 +54,14 @@ export default async function handler(request) {
       const errText = await groqRes.text();
       throw new Error(`Groq API error (${groqRes.status}): ${errText}`);
     }
-    
+
     const data = await groqRes.json();
     return new Response(JSON.stringify(data), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
-    
+
   } catch (error) {
-    console.error('[generate] Error:', error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
