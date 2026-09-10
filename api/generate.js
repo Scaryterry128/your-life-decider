@@ -1,5 +1,5 @@
 export const config = {
-  runtime: 'edge', // Bypasses Vercel's standard 10s timeout limit
+  runtime: 'edge',
 };
 
 const SYSTEM_PROMPT = `You are a Master Life Scheduler. User gives daily constraints, available hours, and goals.
@@ -21,31 +21,31 @@ export default async function handler(request) {
 
   try {
     const { prompt } = await request.json();
-    
     const apiKey = process.env.GROQ_API_KEY;
+
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ error: 'Server missing GROQ_API_KEY environment variable in Vercel settings.' }), 
+        JSON.stringify({ error: 'Missing GROQ_API_KEY in Vercel settings.' }), 
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     const payload = {
-      model: "llama-3.3-70b-versatile", // Exact Groq active model ID
+      model: "llama-3.1-8b-instant",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: prompt }
       ],
       response_format: { type: "json_object" },
       temperature: 0.7,
-      max_tokens: 2500
+      max_tokens: 2000
     };
 
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${apiKey.trim()}`
       },
       body: JSON.stringify(payload)
     });
