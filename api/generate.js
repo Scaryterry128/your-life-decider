@@ -30,16 +30,17 @@ export default async function handler(request) {
       );
     }
 
-    const payload = {
-      model: "llama-3.1-8b-instant",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: prompt }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 2500
-    };
+    // Replace the model line inside api/generate.js
+const payload = {
+  model: "llama-3.3-70b-versatile", // Updated to an active supported Groq model
+  messages: [
+    { role: "system", content: SYSTEM_PROMPT },
+    { role: "user", content: prompt }
+  ],
+  response_format: { type: "json_object" },
+  temperature: 0.7,
+  max_tokens: 2500
+};
 
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
