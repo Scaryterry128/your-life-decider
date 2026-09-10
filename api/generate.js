@@ -14,6 +14,15 @@ RULES:
 OUTPUT RAW JSON MATCHING:
 {"time_management":{"evaluation":"...","daily_schedule":[{"activity":"...","hours":0}]},"goals":[{"goal_number":1,"goal_name":"...","analysis":{"verdict":"Good ✅","phase_duration":"X Days","explanation":"...","breakdown":["..."]},"guide":{"steps":["..."],"milestones":["..."]},"daily_plan":[{"day":"Day 1","action":"..."}],"gadgets":[{"name":"","price_guess":"","url":"","platform":"","reason":""}],"learning":{"channels":[{"name":"","url":"","description":""}],"videos":[{"title":"","url":""}],"websites":[{"name":"","url":""}]},"post_mastery":{"applications":[""],"monetization":[""],"next_steps":[""]}}]}`;
 
+// List of supported Groq model candidates in order of preference
+const MODEL_CANDIDATES = [
+  "llama-3.3-70b-versatile",
+  "openai/gpt-oss-20b",
+  "openai/gpt-oss-120b",
+  "llama-3.1-8b-instant",
+  "qwen/qwen3.6-27b"
+];
+
 export default async function handler(request) {
   if (request.method !== 'POST') {
     return new Response(
@@ -35,37 +44,74 @@ export default async function handler(request) {
 
     const apiKey = rawApiKey.trim();
 
-    const payload = {
-      model: "llama-3.1-8b-instant",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: prompt }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 2000
-    };
+    // 1. Dynamically check active models for this key to prevent 404 model_not_found
+    let selectedModel = MODEL_CANDIDATES[0];
+    try {
+      const modelsRes = await fetch('https://api.groq.com/openai/v1/models', {
+        headers: { 'Authorization': `Bearer ${apiKey}` }
+      });
+      if (modelsRes.ok) {
+        const modelsData = await modelsRes.json();
+        const availableIds = (modelsData.data || []).map(m => m.id);
+        
+        // Find first candidate present in the account's accessible model list
+        const match = MODEL_CANDIDATES.find(c => availableIds.includes(c));
+        if (match) {
+          selectedModel = match;
+        } else if (availableIds.length > 0) {
+          const textModel = availableIds.find(id => !id.includes('whisper') && !id.includes('guard') && !id.includes('orpheus'));
+          if (textModel) selectedModel = textModel;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch model list dynamically, falling back to default list.', e);
+    }
 
-    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify(payload)
-    });
+    // 2. Fallback loop across candidates if selected model fails
+    let groqRes;
+    let errText = '';
+    const modelsToTry = [selectedModel, ...MODEL_CANDIDATES.filter(m => m !== selectedModel)];
 
-    if (!groqRes.ok) {
-      const errText = await groqRes.text();
+    for (const modelId of modelsToTry) {
+      const payload = {
+        model: modelId,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: prompt }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 2000
+      };
+
+      groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (groqRes.ok) {
+        break; // Successfully generated output
+      }
+
+      errText = await groqRes.text();
+      // Stop looping if error is not model_not_found (e.g. 401 Unauthorized)
+      if (groqRes.status !== 404 && !errText.includes('model_not_found')) {
+        break;
+      }
+    }
+
+    if (!groqRes || !groqRes.ok) {
       return new Response(
-        JSON.stringify({ error: `Groq API returned status ${groqRes.status}: ${errText}` }), 
-        { status: groqRes.status, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: `Groq API error (${groqRes?.status || 500}): ${errText}` }), 
+        { status: groqRes?.status || 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     const groqData = await groqRes.json();
-    
-    // Extract and unwrap AI content string safely
     const contentStr = groqData.choices?.[0]?.message?.content || '{}';
     const cleanedContent = contentStr.replace(/```json|```/g, '').trim();
     const scheduleData = JSON.parse(cleanedContent);
