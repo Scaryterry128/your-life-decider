@@ -1,5 +1,5 @@
 export const config = {
-  runtime: 'edge', // Avoids Vercel 10s serverless timeout
+  runtime: 'edge',
 };
 
 const SYSTEM_PROMPT = `You are a Master Life Scheduler. User gives daily constraints, available hours, and goals.
@@ -30,11 +30,8 @@ export default async function handler(request) {
       );
     }
 
-    // Model name strictly formatted with hyphens
-    const targetModel = "llama-3.1-8b-instant";
-
     const payload = {
-      model: targetModel,
+      model: "llama-3.1-8b-instant",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: prompt }
